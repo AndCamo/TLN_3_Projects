@@ -180,12 +180,15 @@ if __name__ == "__main__":
     json_data_common = json.load(open("./data/3000_common_words.json"))
     common_words = json_data_common["word_list"]
 
+
     json_data_ambiguous = json.load(open("data/ambiguous_word_list.json"))
     ambiguous_words = json_data_ambiguous["word_list"]
 
+    # word alreay used for create a pseudo-word
     json_data_used = json.load(open("./data/used_word_list.json"))
     used_words = json_data_used["word_list"]
 
+    # get a list of new possible terms for pseudo-words
     not_used_word = list(set(common_words) - set(used_words))
 
     lemmas = random.sample(not_used_word, 100)
