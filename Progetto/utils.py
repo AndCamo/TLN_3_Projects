@@ -26,44 +26,21 @@ def merge_results(path):
     df_unico.to_csv("./results/final_pseudoword_dictionary.csv", index=False)
 
 
-def ambiguity_drop_score(synsets_x, synsets_y, synsets_x_y):
-    """
-    synsets_x: list of synset ids for the term X in L1
-    synsets_y: list of synset ids for the term Y in L2
-    """
+
+results = pd.read_csv("./results/top_pseudowords_by_ambiguity_drop.csv")
+
+cleaned_results = results[results["|synsets_L1_L2|"] != 0]
+
+cleaned_results.describe().to_csv("./results/top_ambiguity_drop_stats.csv")
+
+"""
+# extract the top N rows
+N = 100
+top_n_results = results.nlargest(N, "ambiguity_drop")
+top_n_results.to_csv("./results/top_pseudowords_by_ambiguity_drop.csv", index=False)
+"""
 
 
-
-
-
-    if synsets_x == 0 or synsets_y == 0:
-        return 0
-
-    ambiguity_drop = 2 * (((synsets_x + synsets_y - 2 * synsets_x_y) * math.sqrt(synsets_x * synsets_y))
-                     / math.pow(synsets_x + synsets_y, 2))
-
-    return ambiguity_drop
-
-"""results = pd.read_csv("./results/results.csv")
-
-ambiguity_drops = []
-for index, row in results.iterrows():
-    synsets_x = row["|synsets_L1|"]
-    synsets_y = row["|synsets_L2|"]
-    synsets_x_y = row["|synsets_L1_L2|"]
-
-    ambiguity_drop = ambiguity_drop_score(synsets_x, synsets_y, synsets_x_y)
-    ambiguity_drops.append(ambiguity_drop)
-
-# Inserisce la colonna "ambiguity_drop" alla posizione 2 (terza colonna)
-results.insert(2, "ambiguity_drop", ambiguity_drops)
-
-results.to_csv("./results/results_updated.csv", index=False)"""
-
-
-
-path = "./results"
-merge_results(path)
 
 
 
