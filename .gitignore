@@ -1,0 +1,64 @@
+Esercitazione_1/model
+Esercitazione_2_3/data
+Esercitazione_2_3/model
+Esercitazione_4/data
+Esercitazione_4/model
+Esercitazione_1/embeddings.npz
+
+RAG/
+
+.env
+**/*.env
+
+
+.DS_Store
+**/.DS_Store
+
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+venv1/
+
+.idea/
+
+
+
+# PyPI configuration file
+.pypirc
