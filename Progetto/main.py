@@ -1,10 +1,13 @@
+import random
+
 import requests
 import json
 import deepl
 import pandas as pd
 import dotenv
+import math
 
-BABELNET_API_KEY = dotenv.get_key(".env", "BABELNET_API_KEY1")
+BABELNET_API_KEY = dotenv.get_key(".env", "BABELNET_API_KEY3")
 DEEPL_API_KEY = dotenv.get_key(".env", "DEEPL_API_KEY")
 
 translator = deepl.Translator(DEEPL_API_KEY)
@@ -79,6 +82,31 @@ def ambiguity_reduction_score(synsets_x, synsets_y):
 
     return ambiguity_reduction
 
+def ambiguity_drop_score(synsets_x, synsets_y):
+    """
+    synsets_x: list of synset ids for the term X in L1
+    synsets_y: list of synset ids for the term Y in L2
+    """
+
+    synsets_x_set = set(synsets_x)
+    synsets_y_set = set(synsets_y)
+
+    synsets_x_y_set = synsets_x_set.intersection(synsets_y_set)
+
+    reduction_x = len(synsets_x) - len(synsets_x_y_set)
+    reduction_y = len(synsets_y) - len(synsets_x_y_set)
+
+    if (len(synsets_x_set) + len(synsets_y_set)) == 0:
+        return 0
+
+    if len(synsets_x_set) == 0 or len(synsets_y_set) == 0:
+        return 0
+
+    ambiguity_drop = 2 * (((len(synsets_x_set) + len(synsets_y_set) - 2 * len(synsets_x_y_set)) * math.sqrt(len(synsets_x_set) * len(synsets_y_set)))
+                     / math.pow(len(synsets_x_set) + len(synsets_y_set), 2))
+
+    return ambiguity_drop
+
 
 def get_all_pseudoword(lemma):
     search_lang = "EN"
@@ -104,11 +132,14 @@ def get_all_pseudoword(lemma):
                     synsets_intersection = list(set(synset_ids1).intersection(synset_ids2))
                     if len(synsets_intersection) == 0:
                         ambiguity_reduction = -1
+                        ambiguity_drop = -1
                     else:
                         ambiguity_reduction = ambiguity_reduction_score(synset_ids1, synset_ids2)
+                        ambiguity_drop = ambiguity_drop_score(synset_ids1, synset_ids2)
 
                     pseudowords[pseudoword] = {
                         "ambiguity_reduction": ambiguity_reduction,
+                        "ambiguity_drop": ambiguity_drop,
                         "L1": lemma1[1],
                         "L2": lemma2[1],
                         "|synsets_L1|": len(synset_ids1),
@@ -131,8 +162,6 @@ def get_best_pseudoword(lemma):
     return result
 
 def save_pseudowords(pseudowords):
-
-
     data_list = []
     pseudoword_list = []
 
@@ -145,18 +174,44 @@ def save_pseudowords(pseudowords):
 
 
 
-lemmas = ["active", "bad", "big", "bound", "drag", "drift", "exchange", "extend", "fair", "feel", "fix", "home", "job", "leave", "out", "puff", "range", "register", "regular", "scratch", "shock", "slack", "spike", "squeeze", "string", "take in", "train", "trim", "upset", "walk", "wild", "yield"]
+if __name__ == "__main__":
 
-size = len(lemmas)
-results = []
 
-for lemma in lemmas:
-    print(f"{lemmas.index(lemma) + 1}/{size}")
-    pseudoword = get_best_pseudoword(lemma)
-    results.append(pseudoword)
+    json_data_common = json.load(open("./data/3000_common_words.json"))
+    common_words = json_data_common["word_list"]
 
-dataframe = pd.DataFrame(results, index=lemmas)
-dataframe.to_csv("17_meanings_pseudowords.csv", index=False)
+    json_data_ambiguous = json.load(open("data/ambiguous_word_list.json"))
+    ambiguous_words = json_data_ambiguous["word_list"]
+
+    json_data_used = json.load(open("./data/used_word_list.json"))
+    used_words = json_data_used["word_list"]
+
+    not_used_word = list(set(common_words) - set(used_words))
+
+    lemmas = random.sample(not_used_word, 100)
+
+    print(lemmas)
+    size = len(lemmas)
+
+    results = []
+
+    for lemma in lemmas:
+        print(f"{lemmas.index(lemma) + 1}/{size}")
+        pseudoword = get_best_pseudoword(lemma)
+        results.append(pseudoword)
+
+    new_used_words = {
+        "word_list": used_words + lemmas,
+    }
+
+    # update the used word list
+    with open("./data/used_word_list.json", "w", encoding="utf-8") as f:
+        json.dump(new_used_words, f, ensure_ascii=False, indent=4)
+
+
+    dataframe = pd.DataFrame(results, index=lemmas)
+    dataframe.to_csv("pseudowords8.csv", index=False)
+
 
 
 

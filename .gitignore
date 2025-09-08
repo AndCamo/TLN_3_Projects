@@ -5,6 +5,9 @@ Esercitazione_4/data
 Esercitazione_4/model
 Esercitazione_1/embeddings.npz
 
+Progetto/ambiguous_results
+Progetto/common_results
+
 RAG/
 
 .env
